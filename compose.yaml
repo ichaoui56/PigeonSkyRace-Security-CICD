@@ -5,42 +5,60 @@ services:
     image: postgres:latest
     container_name: postgres-container
     environment:
-      POSTGRES_USER: ${POSTGRES_USER:-postgres}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-123}
-      POSTGRES_DB: ${POSTGRES_DB:-PSRDep}
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 123
+      POSTGRES_DB: PSRDep
     networks:
       - my_network
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
-      interval: 10s
-      retries: 5
+
+#  keycloak:
+#    image: quay.io/keycloak/keycloak:latest
+#    container_name: keycloak
+#    environment:
+#      DB_VENDOR: postgres
+#      DB_ADDR: postgres-container
+#      DB_DATABASE: keycloak
+#      DB_USER: postgres
+#      DB_PASSWORD: 123
+#      KEYCLOAK_USER: admin
+#      KEYCLOAK_PASSWORD: admin
+#    networks:
+#      - my_network
+#    ports:
+#      - "8080:8080"
+#    volumes:
+#      - keycloak_data:/opt/keycloak/data
+#    depends_on:
+#      - postgres
+#    command: start-dev
 
   spring-app:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: pigeonskyrace
+    container_name: pigeonskyracedep
     networks:
       - my_network
     ports:
       - "8443:8443"
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-container:5432/PSRDep
-      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-postgres}
-      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-123}
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: 123
     volumes:
       - keystore_volume:/app
     depends_on:
-      postgres:
-        condition: service_healthy
+      - postgres
+#      - keycloak
 
 volumes:
   postgres_data:
   keystore_volume:
+  keycloak_data:
 
 networks:
   my_network:
