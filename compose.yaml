@@ -11,30 +11,45 @@ services:
     networks:
       - my_network
     ports:
-      - "5432:5432"
+      - "5433:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
-#  keycloak:
-#    image: quay.io/keycloak/keycloak:latest
-#    container_name: keycloak
-#    environment:
-#      DB_VENDOR: postgres
-#      DB_ADDR: postgres-container
-#      DB_DATABASE: keycloak
-#      DB_USER: postgres
-#      DB_PASSWORD: 123
-#      KEYCLOAK_USER: admin
-#      KEYCLOAK_PASSWORD: admin
-#    networks:
-#      - my_network
-#    ports:
-#      - "8080:8080"
-#    volumes:
-#      - keycloak_data:/opt/keycloak/data
-#    depends_on:
-#      - postgres
-#    command: start-dev
+  jenkins:
+    image: jenkins/jenkins:lts
+    container_name: jenkins
+    user: root
+    environment:
+      JAVA_OPTS: "-Djenkins.install.runSetupWizard=false"
+    ports:
+      - "8080:8080"
+      - "50000:50000"
+    volumes:
+      - jenkins_home:/var/jenkins_home
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - my_network
+
+  #  keycloak:
+  #    image: quay.io/keycloak/keycloak:latest
+  #    container_name: keycloak
+  #    environment:
+  #      DB_VENDOR: postgres
+  #      DB_ADDR: postgres-container
+  #      DB_DATABASE: keycloak
+  #      DB_USER: postgres
+  #      DB_PASSWORD: 123
+  #      KEYCLOAK_USER: admin
+  #      KEYCLOAK_PASSWORD: admin
+  #    networks:
+  #      - my_network
+  #    ports:
+  #      - "8080:8080"
+  #    volumes:
+  #      - keycloak_data:/opt/keycloak/data
+  #    depends_on:
+  #      - postgres
+  #    command: start-dev
 
   spring-app:
     build:
@@ -59,6 +74,7 @@ volumes:
   postgres_data:
   keystore_volume:
   keycloak_data:
+  jenkins_home:
 
 networks:
   my_network:
